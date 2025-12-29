@@ -1,0 +1,35 @@
+
+<?php
+session_start();
+if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'organizer') {
+    header('Location: ../login.php');
+    exit;
+}
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Organizer Dashboard</title>
+    <link rel="stylesheet" href="../assets/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container py-4">
+    <h2>Organizer Dashboard</h2>
+    <p>Selamat datang, <?php echo htmlspecialchars($_SESSION['user']['name']); ?> 👋</p>
+    <div class="row g-3">
+        <div class="col-md-3">
+            <a href="../events/list.php" class="btn btn-primary w-100">Event Management</a>
+        </div>
+        <div class="col-md-3">
+            <a href="../events/form.php?action=create" class="btn btn-success w-100">Create Event</a>
+        </div>
+        <div class="col-md-3">
+            <a href="../attendance/list.php" class="btn btn-warning w-100">Attendance</a>
+        </div>
+        <div class="col-md-3">
+            <a href="../feedback/summary.php" class="btn btn-info w-100">Feedback Summary</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>
