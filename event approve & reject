@@ -1,0 +1,16 @@
+<?php
+include("../config/db.php");
+if ($_SESSION['role'] != 'admin') die("Access denied");
+
+$event_id = $_GET['id'];
+$action = $_GET['action'];
+$admin_id = $_SESSION['user_id'];
+
+$conn->query("UPDATE events SET status='$action' WHERE event_id=$event_id");
+
+$conn->query("
+INSERT INTO event_approvals (event_id, admin_id, approval_status)
+VALUES ($event_id, $admin_id, '$action')
+");
+
+header("Location: event_list.php");
