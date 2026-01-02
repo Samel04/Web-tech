@@ -1,0 +1,17 @@
+<?php
+include("../config/db.php");
+if ($_SESSION['role'] != 'organizer') die("Access denied");
+
+$event_id = $_POST['event_id'];
+$present = $_POST['present'] ?? [];
+
+$conn->query("DELETE FROM attendance WHERE event_id=$event_id");
+
+foreach ($present as $pid) {
+    $conn->query("
+    INSERT INTO attendance (event_id, participant_id, attendance_status)
+    VALUES ($event_id, $pid, 'present')
+    ");
+}
+
+header("Location: my_events.php");
