@@ -1,0 +1,28 @@
+<?php
+include("../config/db.php");
+if ($_SESSION['role'] != 'organizer') die("Access denied");
+
+$event_id = $_GET['event_id'];
+
+$result = $conn->query("
+SELECT u.user_id, u.full_name
+FROM event_registrations r
+JOIN users u ON r.participant_id = u.user_id
+WHERE r.event_id=$event_id AND r.status='registered'
+");
+?>
+
+<h2>Attendance</h2>
+
+<form method="post" action="attendance_save.php">
+<input type="hidden" name="event_id" value="<?= $event_id ?>">
+
+<?php while($row = $result->fetch_assoc()) { ?>
+<label>
+    <input type="checkbox" name="present[]" value="<?= $row['user_id'] ?>">
+    <?= $row['full_name'] ?>
+</label><br>
+<?php } ?>
+
+<button type="submit">Save Attendance</button>
+</form>

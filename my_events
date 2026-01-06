@@ -1,0 +1,20 @@
+<?php
+include("../config/db.php");
+if ($_SESSION['role'] != 'organizer') die("Access denied");
+
+$org_id = $_SESSION['user_id'];
+$result = $conn->query("
+SELECT * FROM events 
+WHERE organizer_id=$org_id AND status='approved'
+");
+?>
+
+<h2>My Events</h2>
+<ul>
+<?php while($row = $result->fetch_assoc()) { ?>
+<li>
+    <?= $row['title'] ?> |
+    <a href="attendance.php?event_id=<?= $row['event_id'] ?>">Take Attendance</a>
+</li>
+<?php } ?>
+</ul>
