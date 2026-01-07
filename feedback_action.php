@@ -1,28 +1,28 @@
-@ -0,0 +1,27 @@
 <?php
-include("../config/db.php");
 session_start();
+require_once "db.php";
 
-if ($_SESSION['role'] != 'participant') die("Access denied");
+if ($_SESSION['role'] !== 'participant') {
+    die("Access denied");
+}
 
-$event_id = $_POST['event_id'];
-$rating = $_POST['rating'];
-$comments = $_POST['comments'];
-$participant_id = $_SESSION['user_id'];
+$event_id = (int)$_POST['event_id'];
+$rating = (int)$_POST['rating'];
+$comments = mysqli_real_escape_string($conn, $_POST['comments']);
+$uid = (int)$_SESSION['user_id'];
 
-/* Prevent duplicate feedback */
 $check = $conn->query("
-SELECT * FROM feedback
-WHERE event_id=$event_id AND participant_id=$participant_id
+SELECT 1 FROM feedback
+WHERE event_id=$event_id AND participant_id=$uid
 ");
 
 if ($check->num_rows > 0) {
-    die("You have already submitted feedback for this event.");
+    die("Feedback already submitted.");
 }
 
 $conn->query("
 INSERT INTO feedback (event_id, participant_id, rating, comments)
-VALUES ($event_id, $participant_id, $rating, '$comments')
+VALUES ($event_id, $uid, $rating, '$comments')
 ");
 
-echo "Feedback submitted successfully.";
+echo "Feedback submitted successfully.<br><a href='feedback_submit.php'>Back</a>";
