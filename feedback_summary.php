@@ -1,27 +1,28 @@
-@ -0,0 +1,41 @@
 <?php
-include("../config/db.php");
 session_start();
-if ($_SESSION['role'] == 'participant') die("Access denied");
+require_once "db.php";
 
-$condition = "";
-if ($_SESSION['role'] == 'organizer') {
-    $uid = $_SESSION['user_id'];
-    $condition = "WHERE e.organizer_id=$uid";
+if (!isset($_SESSION['role'])) {
+    die("Access denied");
 }
 
-$sql = "
-SELECT e.title,
-       COUNT(f.feedback_id) AS total_feedback,
-       AVG(f.rating) AS avg_rating
-FROM events e
-LEFT JOIN feedback f ON e.event_id = f.event_id
-$condition
-GROUP BY e.event_id
-";
-
-$result = $conn->query($sql);
+/*
+ADMIN  → see ALL events
+ORGANIZER → see ONLY own events
+*/
+$where = "";
+if ($_SESSION['role'] === 'organizer') {
+    $uid = (int)$_SESSION['user_id'];
+    $where = "WHERE e.organizer_id = $uid";
+}
 ?>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Feedback Summary</title>
+</head>
+<body>
 
 <h2>📊 Feedback Summary</h2>
 
@@ -32,11 +33,32 @@ $result = $conn->query($sql);
     <th>Average Rating</th>
 </tr>
 
-<?php while($row = $result->fetch_assoc()) { ?>
-<tr>
-    <td><?= $row['title'] ?></td>
-    <td><?= $row['total_feedback'] ?></td>
-    <td><?= number_format($row['avg_rating'],2) ?></td>
-</tr>
-<?php } ?>
+<?php
+$sql = "
+SELECT e.title,
+       COUNT(f.feedback_id) AS total_feedback,
+       IFNULL(AVG(f.rating),0) AS avg_rating
+FROM events e
+LEFT JOIN feedback f ON e.event_id = f.event_id
+$where
+GROUP BY e.event_id
+ORDER BY e.event_date DESC
+";
+
+$result = $conn->query($sql);
+
+while ($row = $result->fetch_assoc()) {
+    echo "<tr>
+            <td>{$row['title']}</td>
+            <td>{$row['total_feedback']}</td>
+            <td>".number_format($row['avg_rating'],2)."</td>
+          </tr>";
+}
+?>
+
 </table>
+
+<a href="javascript:history.back()">← Back</a>
+
+</body>
+</html>
